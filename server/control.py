@@ -48,7 +48,7 @@ def serialControl(req):
 
 # 扉の開閉を行うステッピングモータの制御
 def stepControl(req):
-    print('DCモータ制御中...')
+    print('ステッピングモータ制御中...')
     serialControl(req)
     print('Finish.')
 
