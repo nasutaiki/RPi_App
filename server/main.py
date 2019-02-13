@@ -1,51 +1,38 @@
 # coding: UTF-8
 import socket, control
 
-class tcpServer():
-
-    def init(self):
-        # TCP通信のセットアップ
-        host = '127.0.0.1' # サーバーのホスト名
-        port = 12345 # PORTを指定
-        
-        serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serversock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        serversock.bind((host,port)) # IPとPORTを指定してバインド
-        serversock.listen(10) # 接続の待ち受け（キューの最大数を指定）
-        print('コネクション待ち...')
-
-        self.clientsock, client_address = serversock.accept() # 接続されればデータを格納
-        print('コネクションに成功しました！')
-
-    def tcpRecv(self):
-        rcvmsg = self.clientsock.recv(1024)
-        return rcvmsg
-
-    def tcpSend(self, s_msg):
-        self.clientsock.sendall(s_msg) #メッセージを返します
-
-    def tcpFinish(self):
-        self.clientsock.close()
-
 
 if __name__ == '__main__':
-    client = tcpServer()
+    # TCP通信のセットアップ
+    host = '172.20.10.4' # サーバーのホスト名
+    port = 12345 # PORTを指定
+
+    serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serversock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    serversock.bind((host,port)) # IPとPORTを指定してバインド
+    serversock.listen(10) # 接続の待ち受け（キューの最大数を指定）
+    print('コネクション待ち...')
+
+    clientsock, client_address = serversock.accept() # 接続されればデータを格納
+    print('コネクションに成功しました！')
 
     while True:
-        mode = client.tcpRecv()
+        mode = clientsock.recv(1024)
         if mode == 'f':
-            control.dcmControl('f')
+            control.stepControl('f')
+            clientsock.sendall(0) #メッセージを返す
         elif mode == 'b':
-            control.dcmControl('b')
+            control.stepControl('b')
+            clientsock.sendall(0)
         elif mode == 'o':
             weight = control.getWeight('o')
-            client.tcpSend(weight)
+            clientsock.sendall(weight)
         elif mode == 'i':
             weight = control.getWeight('i')
-            client.tcpSend(weight)
+            clientsock.sendall(weight)
         elif mode == 's':
             control.soundControlOK()
         elif mode == 'n':
             control.soundControlNG()
     
-    client.tcpFinish()
+    clientsock.close()

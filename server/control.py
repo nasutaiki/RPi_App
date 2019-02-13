@@ -1,9 +1,12 @@
 # coding: UTF-8
 import time, serial
+from pi_switch import RCSwitchSender
 
+sender = RCSwitchSender()
+sender.enableTransmit(0) 
 
 # ArduinoとSerial通信を行う
-def serialControl(device, req):
+def serialControl(req):
     # 初期化
     arduino = serial.Serial('/dev/ttyUSB0', 9600)
     time.sleep(2)
@@ -22,15 +25,17 @@ def serialControl(device, req):
 
 
 # 扉の開閉を行うDCモータの制御
-def dcmControl(req):
+def stepControl(req):
     print('DCモータ制御中...')
-    serialControl(devices['dc'], req)
+    serialControl(req)
+    print('Finish.')
 
 
 # ユーザの重量を取得する関数
-def getWeight():
+def getWeight(req):
     print('重量チェック中...')
-    weight = serialControl(devices['weight'], 'g')
+    weight = serialControl(req)
+    print('Finish.')
     return weight
 
 
@@ -42,8 +47,10 @@ def soundControlOK():
     # 音楽再生、および再生回数の設定
     pygame.mixer.music.play(1)
     time.sleep(60)
+    sender.sendDecimal(1, 24)
     # 再生の終了
     pygame.mixer.music.stop()
+
 
 
 def soundControlNG():
@@ -53,5 +60,6 @@ def soundControlNG():
     # 音楽再生、および再生回数の設定
     pygame.mixer.music.play(1)
     time.sleep(60)
+    sender.sendDecimal(2, 24)
     # 再生の終了
     pygame.mixer.music.stop()
