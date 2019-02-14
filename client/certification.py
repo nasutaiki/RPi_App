@@ -1,5 +1,16 @@
 # coding: UTF-8
-import commands, requests, json, os, boto3, urllib2, random
+import commands, requests, json, os, boto3, urllib2, random, serial
+
+
+# Arduinoと接続
+Arduino = serial.Serial('/dev/ttyUSB0', 9600)
+
+# Arduinoに信号を送ってLED制御をする
+def ledControl(req):
+    print('LED control')
+    # 命令を送る
+    Arduino.write(req)
+    time.sleep(1)
 
 
 # ID認証を行う関数
@@ -127,8 +138,8 @@ def faceMatch(image, num):
 # LINEで管理者に通知する
 def sendLINE():
         url = 'URL'
-	channel_access_token = 'トークン'
-	user_id = 'USER ID'
+	channel_access_token = 'TOKEN'
+	user_id = 'USER_ID'
 	data = {
     		'to' : user_id,
     		'messages' : [

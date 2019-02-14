@@ -36,11 +36,9 @@ if __name__ == '__main__':
             clientsock.sendall(weight)
 
         elif mode == b's': # 認証成功
-            control.soundControl('shonin.mp3', 1)
-            clientsock.sendall(0)
+            control.soundControl('shonin.mp3')
 
         elif mode == b'n': # 認証失敗
-            control.soundControl('keikoku.mp3', 2)
-            clientsock.sendall(0)
+            control.soundControl('keikoku.mp3')
     
     clientsock.close()

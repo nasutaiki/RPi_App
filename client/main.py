@@ -23,12 +23,13 @@ if __name__ == '__main__':
         if len(user) == 0:       
             print('sound control')
             client.send('n') # NGのサウンドを再生
-            client.recv(4096)
+            certification.ledControl('n') # NG
             continue
 
         print('sound control')
         client.send('s') # OKのサウンドを再生
-        client.recv(4096)
+        certification.ledControl('o') # OK
+
 
         flg = True    # trueなら入室、falseなら退出
         place = 0     # 現在認証中のユーザの位置を記憶
@@ -59,7 +60,7 @@ if __name__ == '__main__':
             
             print('sound control')
             client.send('n')
-            client.recv(4096)
+            certification.ledControl('n')
 
             continue
         
@@ -67,7 +68,8 @@ if __name__ == '__main__':
         
         print('sound control')
         client.send('s')
-        client.recv(4096)
+        certification.ledControl('o')
+
 
         # 顔認証成功時の処理
         if flg:
@@ -97,7 +99,7 @@ if __name__ == '__main__':
 
                 print('sound control')
                 client.send('n')
-                client.recv(4096)
+                certification.ledControl('n')
 
                 continue
             
