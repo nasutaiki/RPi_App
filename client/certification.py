@@ -127,6 +127,7 @@ def faceMatch(image, num):
 # LINEで管理者に通知する
 def sendLINE():
         url = 'URL'
+	channel_access_token = 'トークン'
 	user_id = 'USER ID'
 	data = {
     		'to' : user_id,
