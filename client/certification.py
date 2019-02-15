@@ -3,7 +3,9 @@ import commands, requests, json, os, boto3, urllib2, random, serial
 
 
 # Arduinoと接続
+print('connecting Arduino')
 Arduino = serial.Serial('/dev/ttyUSB0', 9600)
+print('success!')
 
 # Arduinoに信号を送ってLED制御をする
 def ledControl(req):

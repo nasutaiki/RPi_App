@@ -3,7 +3,9 @@ import time, serial
 
 
 # Arduinoと接続
+print('connecting Arduino')
 Arduino = serial.Serial('/dev/ttyUSB0', 9600)
+print('success!')
 
 # ArduinoとSerial通信を行う
 def serialControl(req):

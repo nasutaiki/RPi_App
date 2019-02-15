@@ -79,6 +79,7 @@ if __name__ == '__main__':
             print('weight control')
             client.send('o')
             weight = client.recv(4096)
+            print(weight)
 
             # 登録するユーザのデータを作成
             myStruct = {'ID': user['ID'], 'Weight': weight}
@@ -92,9 +93,10 @@ if __name__ == '__main__':
             print('weight control')
             client.send('i')
             weight = client.recv(4096)
+            print(weight)
             
             # 入室時と比べて退出時のほうが重量が大きければ退出させない
-            if weight > user_status[place]['Weight']:
+            if weight < user_status[place]['Weight']:
                 certification.sendLINE()
 
                 print('sound control')
