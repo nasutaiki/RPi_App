@@ -1,30 +1,5 @@
 # coding: UTF-8
-import certification, time, socket
-
-
-# TCP通信のコネクションを行う（クライアント）
-class tcpClient():
-
-    def init(self):
-        host = '127.0.0.1' # サーバーのホスト名
-        port = 12345 # PORTを指定
-
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # オブジェクトの作成をします
-        self.client.connect((host, port)) # サーバーに接続
-        print('success connecting!')
-
-    # レスポンスを受け取る
-    def tcpRecv(self):
-        rcvmsg = self.client.recv(4096)
-        return rcvmsg
-
-    # データの送信
-    def tcpSend(self, s_msg):
-        self.client.send(s_msg)
-
-    # 閉じる
-    def tcpFinish(self):
-        self.client.close()
+import certification, socket, time
 
 
 if __name__ == '__main__':
@@ -33,19 +8,28 @@ if __name__ == '__main__':
     user_status.append(myStruct)                       # 初期化
 
     # サーバに接続
-    server = tcpClient()
+    host = '192.168.43.7' # サーバーのホスト名
+    port = 9999 # PORTを指定
+
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # オブジェクトの作成をします
+    client.connect((host, port)) # サーバーに接続
+    print('success connecting!')
 
     while True:
         # ID認証を行う
         user = certification.cardAuthentication()
         
         # 戻り値のユーザデータが空だったらID認証を再度行う
-        if len(user) == 0:        
-            server.tcpSend('n') # NGのサウンドを再生
+        if len(user) == 0:       
+            print('sound control')
+            client.send('n') # NGのサウンドを再生
+            certification.ledControl('n') # NG
             continue
 
-        server.tcpSend('s') # OKのサウンドを再生
-        time.sleep(2)
+        print('sound control')
+        client.send('s') # OKのサウンドを再生
+        certification.ledControl('o') # OK
+
 
         flg = True    # trueなら入室、falseなら退出
         place = 0     # 現在認証中のユーザの位置を記憶
@@ -70,19 +54,32 @@ if __name__ == '__main__':
 
             else:
                 certification.logRegistration(user, False, 'OUT')
+
+            # 管理者へ通知
+            certification.sendLINE()
             
-            server.tcpSend('n')
+            print('sound control')
+            client.send('n')
+            certification.ledControl('n')
+
             continue
         
         certification.faceMatch(user['Image'], 85)
         
+        print('sound control')
+        client.send('s')
+        certification.ledControl('o')
+
+
         # 顔認証成功時の処理
         if flg:
             certification.logRegistration(user, True, 'IN')
             
             # 重量センサーから値を取得
-            server.tcpSend('o')
-            weight = server.tcpRecv()
+            print('weight control')
+            client.send('o')
+            weight = client.recv(4096)
+            print(weight)
 
             # 登録するユーザのデータを作成
             myStruct = {'ID': user['ID'], 'Weight': weight}
@@ -92,27 +89,35 @@ if __name__ == '__main__':
 
         else:
             certification.logRegistration(user, True, 'OUT')
-
-            server.tcpSend('i')
-            weight = server.tcpRecv()
+            
+            print('weight control')
+            client.send('i')
+            weight = client.recv(4096)
+            print(weight)
             
             # 入室時と比べて退出時のほうが重量が大きければ退出させない
-            if weight > user_status[place]['Weight']:
-                server.tcpSend('n')
+            if weight < user_status[place]['Weight']:
+                certification.sendLINE()
+
+                print('sound control')
+                client.send('n')
+                certification.ledControl('n')
+
                 continue
             
             # 退出したユーザのデータを削除
             user_status.remove(user_status[place])
         
-        server.tcpSend('s')
-        time.sleep(2)
+        # ステッピングモータの制御（開ける）
+        print('motor control')
+        client.send('f')
+        client.recv(4096)
 
-        # DCモータの制御（開ける）
-        server.tcpSend('f')
-        time.sleep(3)
+	time.sleep(3)
         
-        # DCモータの制御（開ける）
-        server.tcpSend('b')
-        time.sleep(1)
+        # ステッピングモータの制御（閉める）
+        print('motor control')
+        client.send('b')
+        client.recv(4096)
 
-    server.tcpFinish()
+    client.close()

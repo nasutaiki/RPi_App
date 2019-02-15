@@ -1,5 +1,18 @@
 # coding: UTF-8
-import commands, requests, json, os, boto3
+import commands, requests, json, os, boto3, urllib2, random, serial
+
+
+# Arduinoと接続
+print('connecting Arduino')
+Arduino = serial.Serial('/dev/ttyUSB0', 9600)
+print('success!')
+
+# Arduinoに信号を送ってLED制御をする
+def ledControl(req):
+    print('LED control')
+    # 命令を送る
+    Arduino.write(req)
+    time.sleep(1)
 
 
 # ID認証を行う関数
@@ -47,7 +60,7 @@ def faceAuthentication(userName):
     os.system('wget -O ./../face-app/html/images/capture.jpg http://admin_teamb:qwaszx1212@192.168.43.203:55555/?action=snapshot')
 
     # 撮影画像をS3へアップロード
-    bucket_name='teamb'
+    bucket_name='バケット名'
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket_name)
     bucket.upload_file('./../face-app/html/images/capture.jpg','capture.jpg')
@@ -122,3 +135,29 @@ def faceMatch(image, num):
     
     # レスポンスの表示
     print(r.text)
+
+
+# LINEで管理者に通知する
+def sendLINE():
+        url = 'URL'
+	channel_access_token = 'TOKEN'
+	user_id = 'USER_ID'
+	data = {
+    		'to' : user_id,
+    		'messages' : [
+        		{
+            			'type' : 'text',
+            			'text' : '違反を検知しました'
+        		}
+    		]
+	}
+	jsonstr = json.dumps(data)
+	print(jsonstr)
+
+	request = urllib2.Request(url, data=jsonstr)
+	request.add_header('Content-Type', 'application/json')
+	request.add_header('Authorization', 'Bearer ' + channel_access_token)
+	request.get_method = lambda: 'POST'
+	response = urllib2.urlopen(request)
+	ret = response.read()
+	print('Response:', ret)

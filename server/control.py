@@ -1,32 +1,29 @@
 # coding: UTF-8
 import time, serial
-from pi_switch import RCSwitchSender
 
-sender = RCSwitchSender()
-sender.enableTransmit(0) 
+
+# Arduinoと接続
+print('connecting Arduino')
+Arduino = serial.Serial('/dev/ttyUSB0', 9600)
+print('success!')
 
 # ArduinoとSerial通信を行う
 def serialControl(req):
-    # 初期化
-    arduino = serial.Serial('/dev/ttyUSB0', 9600)
-    time.sleep(2)
-
     # 命令を送る
-    arduino.write(req)
+    Arduino.write(req)
     time.sleep(1)
     
     # レスポンスを受け取る
     line = '1023'
-    line = arduino.readline()
+    line = Arduino.readline()
     time.sleep(1)
     
-    arduino.close()
     return int(line)
 
 
-# 扉の開閉を行うDCモータの制御
+# 扉の開閉を行うステッピングモータの制御
 def stepControl(req):
-    print('DCモータ制御中...')
+    print('ステッピングモータ制御中...')
     serialControl(req)
     print('Finish.')
 
@@ -40,26 +37,16 @@ def getWeight(req):
 
 
 # 認証の結果に応じて出力する音の制御
-def soundControlOK():
+def soundControl(sound):
     pygame.mixer.init()
+
     # 音楽ファイルの読み込み
-    pygame.mixer.music.load('shonin.mp3')
+    pygame.mixer.music.load(sound)
+
     # 音楽再生、および再生回数の設定
     pygame.mixer.music.play(1)
     time.sleep(60)
-    sender.sendDecimal(1, 24)
+
     # 再生の終了
     pygame.mixer.music.stop()
-
-
-
-def soundControlNG():
-    pygame.mixer.init()
-    # 音楽ファイルの読み込み
-    pygame.mixer.music.load('keikoku.mp3')
-    # 音楽再生、および再生回数の設定
-    pygame.mixer.music.play(1)
-    time.sleep(60)
-    sender.sendDecimal(2, 24)
-    # 再生の終了
-    pygame.mixer.music.stop()
+    print('Finish.')
