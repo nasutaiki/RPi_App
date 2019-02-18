@@ -1,10 +1,13 @@
 # coding: UTF-8
 import time, serial
+from pydub import AudioSegment
+from pydub.playback import play
 
 
 # Arduinoと接続
 print('connecting Arduino')
 Arduino = serial.Serial('/dev/ttyUSB0', 9600)
+time.sleep(2)
 print('success!')
 
 # ArduinoとSerial通信を行う
@@ -18,7 +21,7 @@ def serialControl(req):
     line = Arduino.readline()
     time.sleep(1)
     
-    return int(line)
+    return line
 
 
 # 扉の開閉を行うステッピングモータの制御
@@ -37,16 +40,7 @@ def getWeight(req):
 
 
 # 認証の結果に応じて出力する音の制御
-def soundControl(sound):
-    pygame.mixer.init()
-
-    # 音楽ファイルの読み込み
-    pygame.mixer.music.load(sound)
-
-    # 音楽再生、および再生回数の設定
-    pygame.mixer.music.play(1)
-    time.sleep(60)
-
-    # 再生の終了
-    pygame.mixer.music.stop()
+def soundControl(music):
+    sound = AudioSegment.from_file(music, 'mp3')
+    play(sound)
     print('Finish.')

@@ -1,10 +1,11 @@
 # coding: UTF-8
-import commands, requests, json, os, boto3, urllib2, random, serial
+import commands, requests, json, os, boto3, urllib2, random, serial, time
 
 
 # Arduinoと接続
 print('connecting Arduino')
 Arduino = serial.Serial('/dev/ttyUSB0', 9600)
+time.sleep(2)
 print('success!')
 
 # Arduinoに信号を送ってLED制御をする
