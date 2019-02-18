@@ -24,11 +24,13 @@ if __name__ == '__main__':
             print('sound control')
             client.send('n') # NGのサウンドを再生
             certification.ledControl('n') # NG
+            client.recv(4096)
             continue
 
         print('sound control')
         client.send('s') # OKのサウンドを再生
         certification.ledControl('o') # OK
+        client.recv(4096)
 
 
         flg = True    # trueなら入室、falseなら退出
@@ -61,6 +63,7 @@ if __name__ == '__main__':
             print('sound control')
             client.send('n')
             certification.ledControl('n')
+            client.recv(4096)
 
             continue
         
@@ -69,6 +72,7 @@ if __name__ == '__main__':
         print('sound control')
         client.send('s')
         certification.ledControl('o')
+        client.recv(4096)
 
 
         # 顔認証成功時の処理
@@ -78,7 +82,7 @@ if __name__ == '__main__':
             # 重量センサーから値を取得
             print('weight control')
             client.send('o')
-            weight = client.recv(4096)
+            weight = int(client.recv(4096))
             print(weight)
 
             # 登録するユーザのデータを作成
@@ -92,16 +96,17 @@ if __name__ == '__main__':
             
             print('weight control')
             client.send('i')
-            weight = client.recv(4096)
+            weight = int(client.recv(4096))
             print(weight)
             
             # 入室時と比べて退出時のほうが重量が大きければ退出させない
-            if weight < user_status[place]['Weight']:
+            if weight < (user_status[place]['Weight'] - 100):
                 certification.sendLINE()
 
                 print('sound control')
                 client.send('n')
                 certification.ledControl('n')
+                client.recv(4096)
 
                 continue
             
@@ -113,7 +118,7 @@ if __name__ == '__main__':
         client.send('f')
         client.recv(4096)
 
-	time.sleep(3)
+	    time.sleep(3)
         
         # ステッピングモータの制御（閉める）
         print('motor control')
